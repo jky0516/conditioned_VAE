@@ -25,8 +25,6 @@ class ConditionedVAE(nn.Module):
         if hidden_dims is None:
             hidden_dims = [32, 64, 128]
 
-        in_channels = in_channels + emb_channels
-
         # Build Encoder
         for h_dim in hidden_dims:
             modules.append(
@@ -54,7 +52,7 @@ class ConditionedVAE(nn.Module):
         modules = []
         modules.append(
             nn.Sequential(
-                nn.Conv2d(latent_dim, out_channels=256,
+                nn.Conv2d(latent_dim + emb_channels, out_channels=256,
                             kernel_size=3, padding=1),
                 nn.BatchNorm2d(256),
                 nn.LeakyReLU())
@@ -133,16 +131,18 @@ class ConditionedVAE(nn.Module):
         eps = torch.randn_like(std)
         return eps * std + mu
 
-    def forward(self, x, cond_input):
-        B, _, H, W = x.shape
-        cond_emb = self.cond_mlp(cond_input)  # [B, emb_channels]
-        cond_map = cond_emb[:, :, None, None].expand(B, cond_emb.shape[1], H, W)
-        x_cat = torch.cat([x, cond_map], dim=1)  # [B, 1 + emb_channels, H, W]   
+    def forward(self, x, cond_input): 
 
-        mu, log_var = self.encode(x_cat)
+        Bx, _x, Hx, Wx = x.shape
+        mu, log_var = self.encode(x)
         z = self.reparameterize(mu, log_var)
 
-        res = self.decode(z)
-        res = F.softmax(res.view(B, -1), dim=1).view(B, 1, H, W)
+        B, _, H, W = z.shape
+        cond_emb = self.cond_mlp(cond_input)  # [B, emb_channels]
+        cond_map = cond_emb[:, :, None, None].expand(B, cond_emb.shape[1], H, W)
+        z_cat = torch.cat([z, cond_map], dim=1)  # [B, 1 + emb_channels, H, W] 
+
+        res = self.decode(z_cat)
+        res = F.softmax(res.view(Bx, -1), dim=1).view(Bx, 1, Hx, Wx)
 
         return  res, mu, log_var
