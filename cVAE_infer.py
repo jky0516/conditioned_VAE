@@ -2,7 +2,6 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, TensorDataset
-from diffusers import DDPMScheduler, UNet2DConditionModel, UNet2DModel
 from tqdm.auto import tqdm
 import numpy as np
 import os
