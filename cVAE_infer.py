@@ -35,16 +35,17 @@ X_val_t,   y_val_t   = to_tensor(X_val, y_val)
 vae = ConditionedVAE().to(device)
 vae.load_state_dict(torch.load('vae.pth'))
 
+cond_input = X_val_t.to(device)
+original = y_val_t.to(device)
+
 # ------------ pixel to pixel scatter --------------- #
 vae.eval()
 with torch.no_grad():
-    recon, _, _ = vae(y_val_t.to(device), X_val_t.to(device))
+    recon = vae.sample(cond_input)
     recon = recon.cpu()
-    original = y_val_t.cpu()
 
 x = original.view(-1).numpy() 
 y = recon.view(-1).numpy()  
-print(x.shape, y.shape)
 
 # 可视化：散点图
 plt.figure(figsize=(6, 6))
@@ -58,14 +59,13 @@ plt.savefig('vae_pixel_wise_scatter.png')
 # -------------------------------------- #
 
 # ----- plot comparison heatmap ------- #
-cond_input = X_val_t.to(device)
-img = y_val_t.to(device)
+
+img = original
 num = 100
 vae.eval()
 
-
 with torch.no_grad():
-    recon, _, _ = vae(img, cond_input)
+    recon = vae.sample(cond_input)
     
     # Get the min and max values for consistent scaling
     vmin = min(img[num,0].min(), recon[num,0].min())

@@ -14,7 +14,7 @@ from conditioned_VAE_model import ConditionedVAE
 # 1. 超参数
 # ========================
 batch_size = 128
-vae_epochs = 50
+vae_epochs = 100
 lr_vae = 1e-3
 kld_weight = 1e-3
 
@@ -36,7 +36,6 @@ def to_tensor(X_arr, y_arr):
 
 X_train_t, y_train_t = to_tensor(X_train, y_train)
 X_val_t,   y_val_t   = to_tensor(X_val, y_val)
-print(y_train_t.shape)
 
 train_loader_vae = DataLoader(TensorDataset(X_train_t, y_train_t), batch_size=batch_size, shuffle=True)
 

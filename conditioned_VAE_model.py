@@ -146,3 +146,16 @@ class ConditionedVAE(nn.Module):
         res = F.softmax(res.view(Bx, -1), dim=1).view(Bx, 1, Hx, Wx)
 
         return  res, mu, log_var
+    
+    def sample(self, cond_input):
+
+        B = cond_input.size(0)
+
+        z = torch.rand(B, self.latent_dim, 4, 4)
+        cond_emb = self.cond_mlp(cond_input)
+        cond_map = cond_emb[:, :, None, None].expand(B, cond_emb.shape[1], 4, 4)
+        z_cat = torch.cat([z, cond_map], dim=1)
+
+        samples = self.decode(z_cat)
+        samples= F.softmax(samples.view(B, -1), dim=1).view(B, 1, 35, 31)
+        return samples
