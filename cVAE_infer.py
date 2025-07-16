@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import torchvision
 from sklearn.model_selection import train_test_split
 import seaborn as sns
-from conditioned_VAE_model import ConditionedVAE
+from conditioned_VAE_model_linear import ConditionedVAE
 
 device = torch.device("cpu")
 

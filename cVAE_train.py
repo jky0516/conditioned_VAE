@@ -8,7 +8,7 @@ import os
 import matplotlib.pyplot as plt
 import torchvision
 from sklearn.model_selection import train_test_split
-from conditioned_VAE_model import ConditionedVAE
+from conditioned_VAE_model_linear import ConditionedVAE
 
 # ========================
 # 1. 超参数
@@ -64,6 +64,7 @@ for epoch in range(vae_epochs):
     vae_loss = total_loss / len(train_loader_vae)
     vae_loss_history.append(vae_loss)
     print(f"VAE Epoch {epoch} Loss: {total_loss/len(train_loader_vae):.6f}")
+    print(torch.mean(mean), torch.mean(torch.exp(0.5 * logvar)))
 
 # 保存VAE
 torch.save(vae.state_dict(), "vae.pth")
